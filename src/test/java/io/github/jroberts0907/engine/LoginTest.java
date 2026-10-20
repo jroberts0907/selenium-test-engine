@@ -11,14 +11,15 @@ import org.junit.jupiter.params.provider.CsvSource;
 import io.github.jroberts0907.engine.pages.InventoryPage;
 import io.github.jroberts0907.engine.pages.LoginPage;
 import io.github.jroberts0907.engine.support.BaseTest;
+import io.github.jroberts0907.engine.support.Config;
 import io.github.jroberts0907.engine.support.TestUsers;
 
 class LoginTest extends BaseTest {
 
     @Test
-    void standardUserReachesProducts() {
+    void validLoginReachesProducts() {
         InventoryPage inventory = new LoginPage(driver).open()
-                .loginAs(TestUsers.STANDARD, TestUsers.PASSWORD);
+                .loginAs(Config.testUser(), TestUsers.PASSWORD);
 
         assertEquals("Products", inventory.title());
         assertTrue(driver.getCurrentUrl().endsWith("/inventory.html"));

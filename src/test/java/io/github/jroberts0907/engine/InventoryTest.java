@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import io.github.jroberts0907.engine.pages.InventoryPage;
 import io.github.jroberts0907.engine.pages.LoginPage;
 import io.github.jroberts0907.engine.support.BaseTest;
+import io.github.jroberts0907.engine.support.Config;
 import io.github.jroberts0907.engine.support.TestUsers;
 
 class InventoryTest extends BaseTest {
@@ -22,7 +23,7 @@ class InventoryTest extends BaseTest {
     // Runs after BaseTest's @BeforeEach, so the browser is already open
     @BeforeEach
     void signIn() {
-        inventory = new LoginPage(driver).open().loginAs(TestUsers.STANDARD, TestUsers.PASSWORD);
+        inventory = new LoginPage(driver).open().loginAs(Config.testUser(), TestUsers.PASSWORD);
     }
 
     @Test
