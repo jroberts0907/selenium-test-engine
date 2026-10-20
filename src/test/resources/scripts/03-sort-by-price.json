@@ -1,0 +1,12 @@
+{
+  "name": "Sorting by price puts the cheapest product first and the most expensive last",
+  "steps": [
+    { "action": "open", "target": "/" },
+    { "action": "type", "target": "testid=username", "value": "${testUser}" },
+    { "action": "type", "target": "testid=password", "value": "${password}" },
+    { "action": "click", "target": "testid=login-button" },
+    { "action": "select", "target": "testid=product-sort-container", "value": "lohi" },
+    { "action": "assertText", "target": "xpath=(//*[@data-test='inventory-item-price'])[1]", "value": "$7.99" },
+    { "action": "assertText", "target": "xpath=(//*[@data-test='inventory-item-price'])[last()]", "value": "$49.99" }
+  ]
+}

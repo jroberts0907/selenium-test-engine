@@ -4,7 +4,8 @@ Automated UI tests for [Sauce Demo](https://www.saucedemo.com), a practice e-com
 Selenium 4 and JUnit. The project has two parts:
 
 1. **Page-object test suite**: 17 JUnit tests covering login, product sorting, the cart and checkout
-2. **Keyword-driven engine**: test cases written as JSON steps, run through Selenium as JUnit tests *(planned)*
+2. **Keyword-driven engine**: test cases written as JSON steps, run through Selenium as JUnit tests, so a new
+   test case is a new JSON file with no Java changes
 
 ## Requirements
 
@@ -46,10 +47,67 @@ Then point the tests at it:
 ./mvnw test -DbaseUrl=http://localhost:3000
 ```
 
+## Keyword-driven engine
+
+Test scripts live in [`src/test/resources/scripts/`](src/test/resources/scripts). Each JSON file is one test:
+
+```json
+{
+  "name": "Signing in shows the product list",
+  "steps": [
+    { "action": "open", "target": "/" },
+    { "action": "type", "target": "testid=username", "value": "${testUser}" },
+    { "action": "type", "target": "testid=password", "value": "${password}" },
+    { "action": "click", "target": "testid=login-button" },
+    { "action": "assertUrlContains", "value": "/inventory.html" },
+    { "action": "assertText", "target": "testid=title", "value": "Products" },
+    { "action": "assertCount", "target": "testid=inventory-item", "value": "6" }
+  ]
+}
+```
+
+`KeywordScriptsTest` turns every file into its own JUnit test (a `@TestFactory` of dynamic tests), named by the
+script's `name` and run in a fresh browser.
+
+| Action | Needs | Does |
+|---|---|---|
+| `open` | target | Opens a path on the site under test (or a full URL) |
+| `click` | target | Waits until clickable, then clicks |
+| `type` | target, value | Clears the field and types the value |
+| `select` | target, value | Picks a dropdown option by its value |
+| `assertText` | target, value | Text equals the value (waits up to 10 s for it to match) |
+| `assertVisible` | target | Element is visible |
+| `assertGone` | target | Element is hidden or removed |
+| `assertCount` | target, value | Exactly that many elements match |
+| `assertUrlContains` | value | Current URL contains the value |
+
+**Targets** are CSS selectors by default, or use a prefix: `testid=username` (`[data-test='username']`),
+`id=user-name`, `xpath=(//button)[1]`, `css=.title`.
+
+**Variables**: `${testUser}` (from `-DtestUser`, default `standard_user`) and `${password}`, so the same script
+runs as any account.
+
+**Checked before running**: scripts are parsed and checked before any browser starts. An unknown action, a missing
+field, or a misspelled one (`"valu"`) fails right away with the file and step number:
+
+```
+05-checkout.json: step 9: unknown action "clik". Known actions: open, click, type, select, assertText, ...
+```
+
+**Failures name the step** and save a screenshot to `target/screenshots/script_<name>.png`:
+
+```
+Step 6 of 7 failed: assertText xpath=(//*[@data-test='inventory-item-price'])[1] "$7.99"
+expected text <$7.99> but was <$29.99>
+```
+
+The engine has its own unit tests (`KeywordEngineTest`) for parsing, checking, locators and variables. They run
+without a browser.
+
 ## Known defects
 
 Sauce Demo ships test accounts with bugs built in. Running the suite as each of them
-(`./mvnw test -DtestUser=problem_user`) found the defects below. `KnownDefectsTest` asserts the correct behavior
+(`./mvnw test -DtestUser=problem_user`) found the 11 defects below. `KnownDefectsTest` asserts the correct behavior
 for each one, so those tests fail until the bug is fixed. They're tagged `known-defect` and left out of the default
 run so the main suite stays green; run them on their own with:
 
@@ -61,6 +119,7 @@ run so the main suite stays green; run them on their own with:
 |---|---|---|---|
 | `problem_user` | Sorting does nothing | Prices stay in default order after choosing "Price (low to high)" | `ProblemUser.sortingWorks`, `InventoryTest` |
 | `problem_user` | Half the products can't be added to the cart | Adding all 6 products leaves the badge at 3 | `ProblemUser.everyProductCanBeAdded` |
+| `problem_user` | The other half can't be removed from the product list | Remove on the backpack leaves the badge at 1 | `ProblemUser.productCanBeRemoved`, script `04` |
 | `problem_user` | Every product shows the same broken image | All 6 image URLs are `sl-404.jpg` | `ProblemUser.productImagesAreDistinct` |
 | `problem_user` | Typing a last name overwrites the first name instead | Checkout never gets past step one; the wrong field errors are shown | `ProblemUser.checkoutAcceptsValidDetails`, `CheckoutTest` |
 | `error_user` | Sorting fails with an alert | "Sorting is broken! This error has been reported to Backtrace." | `ErrorUser.sortingWorks`, `InventoryTest` |
@@ -84,6 +143,15 @@ src/test/java/io/github/jroberts0907/engine/
 ├── CartTest.java                 # adding, removing, continue shopping
 ├── CheckoutTest.java             # full purchase, totals, form validation
 ├── KnownDefectsTest.java         # one test per bug in the buggy test accounts (tag: known-defect)
+├── KeywordScriptsTest.java       # runs each JSON script as a JUnit dynamic test
+├── keyword/                      # the keyword-driven engine
+│   ├── Script.java, Step.java    # a script and its steps, as read from JSON
+│   ├── Keyword.java              # the actions and the fields each one needs
+│   ├── ScriptLoader.java         # reads and checks scripts before any browser starts
+│   ├── KeywordRunner.java        # runs steps in a browser and reports the failing step
+│   ├── Locators.java             # testid= / id= / xpath= / css= targets
+│   ├── Variables.java            # ${name} placeholders
+│   └── KeywordEngineTest.java    # unit tests for the engine (no browser)
 ├── pages/                        # page objects: locators and actions, no assertions
 │   ├── BasePage.java             # explicit-wait helpers and the shared header
 │   ├── LoginPage.java
@@ -95,6 +163,7 @@ src/test/java/io/github/jroberts0907/engine/
 └── support/
     ├── BaseTest.java             # fresh browser per test
     ├── ScreenshotOnFailure.java  # saves target/screenshots/<Test>_<name>.png on failure
+    ├── Screenshots.java          # shared screenshot saving for tests and scripts
     ├── TestUsers.java            # saucedemo.com test accounts
     ├── Config.java               # run settings from -D system properties
     └── DriverFactory.java        # local or remote WebDriver for the chosen browser

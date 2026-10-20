@@ -1,0 +1,13 @@
+{
+  "name": "Adding a product shows the cart badge and removing it clears the badge",
+  "steps": [
+    { "action": "open", "target": "/" },
+    { "action": "type", "target": "testid=username", "value": "${testUser}" },
+    { "action": "type", "target": "testid=password", "value": "${password}" },
+    { "action": "click", "target": "testid=login-button" },
+    { "action": "click", "target": "testid=add-to-cart-sauce-labs-backpack" },
+    { "action": "assertText", "target": "testid=shopping-cart-badge", "value": "1" },
+    { "action": "click", "target": "testid=remove-sauce-labs-backpack" },
+    { "action": "assertGone", "target": "testid=shopping-cart-badge" }
+  ]
+}
