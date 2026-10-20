@@ -29,6 +29,16 @@ public final class Config {
         return Boolean.parseBoolean(System.getProperty("headless", "true"));
     }
 
+    /** Browser window size as "width,height". Smaller sizes make screenshots easier to read. */
+    public static String windowSize() {
+        return System.getProperty("windowSize", "1920,1080");
+    }
+
+    /** Save a screenshot after every step of a JSON script (to target/evidence), not just on failure. */
+    public static boolean recordSteps() {
+        return Boolean.parseBoolean(System.getProperty("recordSteps", "false"));
+    }
+
     /** Selenium Grid / container address. When set, tests run there instead of on this machine. */
     public static String remoteUrl() {
         return System.getenv("SELENIUM_REMOTE_URL");

@@ -19,8 +19,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  */
 public final class DriverFactory {
 
-    private static final String WINDOW_SIZE = "--window-size=1920,1080";
-
     private DriverFactory() {
     }
 
@@ -45,17 +43,18 @@ public final class DriverFactory {
     }
 
     private static Capabilities optionsFor(String browser, boolean headless) {
+        String[] size = Config.windowSize().split(",");
         return switch (browser) {
             case "chrome" -> {
-                ChromeOptions options = new ChromeOptions().addArguments(WINDOW_SIZE);
+                ChromeOptions options = new ChromeOptions().addArguments("--window-size=" + Config.windowSize());
                 yield headless ? options.addArguments("--headless=new") : options;
             }
             case "edge" -> {
-                EdgeOptions options = new EdgeOptions().addArguments(WINDOW_SIZE);
+                EdgeOptions options = new EdgeOptions().addArguments("--window-size=" + Config.windowSize());
                 yield headless ? options.addArguments("--headless=new") : options;
             }
             case "firefox" -> {
-                FirefoxOptions options = new FirefoxOptions().addArguments("--width=1920", "--height=1080");
+                FirefoxOptions options = new FirefoxOptions().addArguments("--width=" + size[0], "--height=" + size[1]);
                 yield headless ? options.addArguments("-headless") : options;
             }
             default -> throw new IllegalArgumentException(

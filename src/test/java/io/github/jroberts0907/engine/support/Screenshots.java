@@ -10,7 +10,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 
-/** Saves failure screenshots to target/screenshots. */
+/** Saves screenshots of the browser, by default to target/screenshots. */
 public final class Screenshots {
 
     private static final Path DIR = Path.of("target", "screenshots");
@@ -18,18 +18,26 @@ public final class Screenshots {
     private Screenshots() {
     }
 
+    /** Saves to target/screenshots/<name>.png, with the name made safe for a file name. */
     public static void save(WebDriver driver, String name) {
+        saveTo(driver, DIR.resolve(safeFileName(name) + ".png"));
+    }
+
+    public static void saveTo(WebDriver driver, Path file) {
         if (!(driver instanceof TakesScreenshot camera)) {
             return;
         }
-        String fileName = name.replaceAll("[^A-Za-z0-9._-]+", "_").replaceAll("^_|_$", "") + ".png";
         try {
-            Files.createDirectories(DIR);
-            Files.write(DIR.resolve(fileName), camera.getScreenshotAs(OutputType.BYTES));
+            Files.createDirectories(file.getParent());
+            Files.write(file, camera.getScreenshotAs(OutputType.BYTES));
         } catch (WebDriverException e) {
             // e.g. a JavaScript alert is open; skip the screenshot rather than hide the real failure
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public static String safeFileName(String name) {
+        return name.replaceAll("[^A-Za-z0-9._-]+", "_").replaceAll("^_|_$", "");
     }
 }

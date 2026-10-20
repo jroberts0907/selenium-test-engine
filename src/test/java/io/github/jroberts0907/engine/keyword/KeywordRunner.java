@@ -1,5 +1,9 @@
 package io.github.jroberts0907.engine.keyword;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +17,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import io.github.jroberts0907.engine.support.Config;
+import io.github.jroberts0907.engine.support.Screenshots;
 
 /**
  * Runs a {@link Script} step by step in a browser. Every step waits for its element,
@@ -25,11 +30,21 @@ public class KeywordRunner {
     private final WebDriver driver;
     private final WebDriverWait wait;
     private final Map<String, String> variables;
+    private final Path evidenceDir;
 
     public KeywordRunner(WebDriver driver, Map<String, String> variables) {
+        this(driver, variables, null);
+    }
+
+    /**
+     * @param evidenceDir if not null, a screenshot is saved here after every step (01-passed.png,
+     *                    02-passed.png, ..., NN-failed.png) as a record of what the test saw
+     */
+    public KeywordRunner(WebDriver driver, Map<String, String> variables, Path evidenceDir) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, TIMEOUT);
         this.variables = variables;
+        this.evidenceDir = evidenceDir;
     }
 
     public void run(Script script) {
@@ -38,9 +53,26 @@ public class KeywordRunner {
             Step step = steps.get(i);
             try {
                 execute(step);
+                saveEvidence(i, "passed", null);
             } catch (AssertionError | RuntimeException e) {
-                throw new AssertionError("Step %d of %d failed: %s%n%s"
-                        .formatted(i + 1, steps.size(), step, firstLine(e.getMessage())), e);
+                String message = "Step %d of %d failed: %s%n%s"
+                        .formatted(i + 1, steps.size(), step, firstLine(e.getMessage()));
+                saveEvidence(i, "failed", message);
+                throw new AssertionError(message, e);
+            }
+        }
+    }
+
+    private void saveEvidence(int stepIndex, String outcome, String failureMessage) {
+        if (evidenceDir == null) {
+            return;
+        }
+        Screenshots.saveTo(driver, evidenceDir.resolve("%02d-%s.png".formatted(stepIndex + 1, outcome)));
+        if (failureMessage != null) {
+            try {
+                Files.writeString(evidenceDir.resolve("failure.txt"), failureMessage);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
         }
     }

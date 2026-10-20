@@ -7,6 +7,14 @@ Selenium 4 and JUnit. The project has two parts:
 2. **Keyword-driven engine**: test cases written as JSON steps, run through Selenium as JUnit tests, so a new
    test case is a new JSON file with no Java changes
 
+![A JSON script running: the script's steps on the left, the browser after step 12 on the right](docs/images/script-running.png)
+
+When a step fails, the engine stops, names the step, and shows expected against actual:
+
+![The sort script failing for problem_user at step 6](docs/images/script-failure.png)
+
+These frames are the engine's own step screenshots (`-DrecordSteps=true`), laid out side by side with the script.
+
 ## Requirements
 
 - JDK 21 or newer
@@ -22,6 +30,8 @@ Maven doesn't need to be installed. The Maven wrapper (`mvnw`) downloads it.
 ./mvnw test -Dheadless=false                 # watch the browser
 ./mvnw test -Dtest=SmokeTest                 # one test class
 ./mvnw test -DtestUser=problem_user          # sign in as a different test account
+./mvnw test -DrecordSteps=true               # screenshot every script step to target/evidence/
+./mvnw test -DwindowSize=1280,800            # browser size (default 1920,1080)
 ```
 
 On Windows, use `mvnw.cmd` in place of `./mvnw`.
@@ -100,6 +110,10 @@ field, or a misspelled one (`"valu"`) fails right away with the file and step nu
 Step 6 of 7 failed: assertText xpath=(//*[@data-test='inventory-item-price'])[1] "$7.99"
 expected text <$7.99> but was <$29.99>
 ```
+
+**Step evidence**: with `-DrecordSteps=true`, every step's screenshot is saved to
+`target/evidence/<script>/` as `01-passed.png`, `02-passed.png`, ..., with `NN-failed.png` and `failure.txt` for a
+failing step, so there is a record of exactly what each test saw.
 
 The engine has its own unit tests (`KeywordEngineTest`) for parsing, checking, locators and variables. They run
 without a browser.

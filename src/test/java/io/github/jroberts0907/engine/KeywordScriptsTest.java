@@ -1,5 +1,6 @@
 package io.github.jroberts0907.engine;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -29,14 +30,19 @@ class KeywordScriptsTest {
     Stream<DynamicTest> scripts() {
         return ScriptLoader.loadFolder("scripts").stream()
                 .map(loaded -> DynamicTest.dynamicTest(
-                        loaded.script().name(), loaded.file().toUri(), () -> runInFreshBrowser(loaded.script())));
+                        loaded.script().name(), loaded.file().toUri(), () -> runInFreshBrowser(loaded)));
     }
 
     // @BeforeEach/@AfterEach run once per @TestFactory, not per dynamic test, so each script manages its own browser
-    private static void runInFreshBrowser(Script script) {
+    private static void runInFreshBrowser(ScriptLoader.Loaded loaded) {
+        Script script = loaded.script();
+        // With -DrecordSteps=true, every step's screenshot goes to target/evidence/<script file>/
+        Path evidenceDir = Config.recordSteps()
+                ? Path.of("target", "evidence", loaded.file().getFileName().toString().replace(".json", ""))
+                : null;
         WebDriver driver = DriverFactory.create();
         try {
-            new KeywordRunner(driver, VARIABLES).run(script);
+            new KeywordRunner(driver, VARIABLES, evidenceDir).run(script);
         } catch (AssertionError e) {
             Screenshots.save(driver, "script_" + script.name());
             throw e;
