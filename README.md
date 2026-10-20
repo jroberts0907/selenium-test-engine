@@ -3,7 +3,7 @@
 Automated UI tests for [Sauce Demo](https://www.saucedemo.com), a practice e-commerce site, written in Java with
 Selenium 4 and JUnit. The project has two parts:
 
-1. **Page-object test suite**: JUnit tests for login, product sorting, the cart and checkout *(in progress)*
+1. **Page-object test suite**: 17 JUnit tests covering login, product sorting, the cart and checkout
 2. **Keyword-driven engine**: test cases written as JSON steps, run through Selenium as JUnit tests *(planned)*
 
 ## Requirements
@@ -51,10 +51,17 @@ Then point the tests at it:
 src/test/java/io/github/jroberts0907/engine/
 ├── SmokeTest.java                # browser starts and the site is up
 ├── LoginTest.java                # valid login and rejected logins
+├── InventoryTest.java            # sorting and the cart badge
+├── CartTest.java                 # adding, removing, continue shopping
+├── CheckoutTest.java             # full purchase, totals, form validation
 ├── pages/                        # page objects: locators and actions, no assertions
-│   ├── BasePage.java             # explicit-wait helpers shared by every page
+│   ├── BasePage.java             # explicit-wait helpers and the shared header
 │   ├── LoginPage.java
-│   └── InventoryPage.java
+│   ├── InventoryPage.java
+│   ├── CartPage.java
+│   ├── CheckoutInfoPage.java
+│   ├── CheckoutOverviewPage.java
+│   └── CheckoutCompletePage.java
 └── support/
     ├── BaseTest.java             # fresh browser per test
     ├── ScreenshotOnFailure.java  # saves target/screenshots/<Test>_<name>.png on failure
