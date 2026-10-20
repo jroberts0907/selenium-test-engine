@@ -1,6 +1,5 @@
 package io.github.jroberts0907.engine.pages;
 
-import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -9,13 +8,14 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.github.jroberts0907.engine.support.Config;
+
 /**
  * Shared helpers for page objects. Every helper waits for its element first,
  * so pages never need Thread.sleep.
  */
 public abstract class BasePage {
 
-    private static final Duration TIMEOUT = Duration.ofSeconds(10);
 
     // The header (and its cart badge) is on every page after login
     private static final By CART_BADGE = By.cssSelector("[data-test='shopping-cart-badge']");
@@ -25,7 +25,7 @@ public abstract class BasePage {
 
     protected BasePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, TIMEOUT);
+        this.wait = new WebDriverWait(driver, Config.timeout());
     }
 
     protected WebElement visible(By locator) {

@@ -34,6 +34,8 @@ Maven doesn't need to be installed. The Maven wrapper (`mvnw`) downloads it.
 ./mvnw test -DtestUser=problem_user          # sign in as a different test account
 ./mvnw test -DrecordSteps=true               # screenshot every script step to target/evidence/
 ./mvnw test -DwindowSize=1280,800            # browser size (default 1920,1080)
+./mvnw test -Dtimeout=5                      # seconds to wait for elements (default 10)
+./mvnw test -Dtest=KeywordScriptsTest -Dscripts=checkout   # only scripts whose file name contains "checkout"
 ```
 
 On Windows, use `mvnw.cmd` in place of `./mvnw`.
@@ -129,7 +131,22 @@ expected text <$7.99> but was <$29.99>
 
 **Step evidence**: with `-DrecordSteps=true`, every step's screenshot is saved to
 `target/evidence/<script>/` as `01-passed.png`, `02-passed.png`, ..., with `NN-failed.png` and `failure.txt` for a
-failing step, so there is a record of exactly what each test saw.
+failing step, and `steps.csv` records when each step started and ended. So there is a record of exactly what each
+test saw, and when.
+
+**Video**: with `-DrecordVideo=true` (Chrome or Edge), the engine records the page through the Chrome DevTools
+screencast to `target/evidence/<script>/frames/`, with each frame's capture time in `frames.csv`. Only the page is
+recorded, never the desktop, and it works headless. The capture times line up with `steps.csv`.
+
+**Demo mode**: `-DstepDelay=700 -Dhighlight=true` pauses before each step, outlines the element it's about to use
+(purple for actions, green for assertions, red when a step fails), and types one character at a time, so a person
+can follow along. These pauses are the project's only sleeps; no test depends on them.
+
+```sh
+# Record the checkout script in demo mode
+./mvnw test -Dtest=KeywordScriptsTest -Dscripts=checkout -Dbrowser=edge \
+  -DstepDelay=700 -Dhighlight=true -DrecordSteps=true -DrecordVideo=true -DwindowSize=1280,800
+```
 
 The engine has its own unit tests (`KeywordEngineTest`) for parsing, checking, locators and variables. They run
 without a browser.
@@ -181,6 +198,7 @@ src/test/java/io/github/jroberts0907/engine/
 │   ├── KeywordRunner.java        # runs steps in a browser and reports the failing step
 │   ├── Locators.java             # testid= / id= / xpath= / css= targets
 │   ├── Variables.java            # ${name} placeholders
+│   ├── DemoMode.java             # optional pacing and highlighting for watching or recording
 │   └── KeywordEngineTest.java    # unit tests for the engine (no browser)
 ├── pages/                        # page objects: locators and actions, no assertions
 │   ├── BasePage.java             # explicit-wait helpers and the shared header
@@ -194,10 +212,11 @@ src/test/java/io/github/jroberts0907/engine/
     ├── BaseTest.java             # fresh browser per test
     ├── ScreenshotOnFailure.java  # saves target/screenshots/<Test>_<name>.png on failure
     ├── Screenshots.java          # shared screenshot saving for tests and scripts
+    ├── BrowserRecorder.java      # page video through the DevTools screencast
     ├── TestUsers.java            # saucedemo.com test accounts
     ├── Config.java               # run settings from -D system properties
     └── DriverFactory.java        # local or remote WebDriver for the chosen browser
 ```
 
 Tests only talk to page objects, never to locators, so a change to the site means fixing one page class rather
-than every test. Waits are explicit (`WebDriverWait`); there is no `Thread.sleep` anywhere.
+than every test. Waits are explicit (`WebDriverWait`); the only `Thread.sleep` is demo mode's optional pacing.
