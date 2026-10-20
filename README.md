@@ -1,5 +1,7 @@
 # Selenium Test Engine
 
+[![Tests](https://github.com/jroberts0907/selenium-test-engine/actions/workflows/tests.yml/badge.svg)](https://github.com/jroberts0907/selenium-test-engine/actions/workflows/tests.yml)
+
 Automated UI tests for [Sauce Demo](https://www.saucedemo.com), a practice e-commerce site, written in Java with
 Selenium 4 and JUnit. The project has two parts:
 
@@ -56,6 +58,20 @@ Then point the tests at it:
 ```sh
 ./mvnw test -DbaseUrl=http://localhost:3000
 ```
+
+## Continuous integration
+
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs on every push to `main` and every pull request:
+
+- **Suite**: the full default suite in Chrome, Firefox and Edge, in parallel. Each browser runs in its own
+  `selenium/standalone-<browser>` container, and the tests connect to it through `SELENIUM_REMOTE_URL`. A failure
+  fails the build and uploads that run's screenshots and test reports as artifacts.
+- **Known defects**: the `known-defect` tests in Chrome. They're expected to fail, so they don't fail the build.
+  The job summary lists which defects are still present and warns if one starts passing (the bug may be fixed, so
+  the test belongs in the main suite). Defect screenshots are uploaded every run.
+
+Each job writes a results table to its summary page
+([`.github/scripts/test_summary.py`](.github/scripts/test_summary.py)). CI tests the public site at saucedemo.com.
 
 ## Keyword-driven engine
 

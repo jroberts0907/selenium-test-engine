@@ -1,3 +1,4 @@
-# The Maven wrapper script must keep LF endings or it breaks on Linux CI
+# Shell scripts must keep LF endings or they break on Linux CI
 mvnw text eol=lf
+*.sh text eol=lf
 *.cmd text eol=crlf

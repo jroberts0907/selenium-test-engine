@@ -1,0 +1,103 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The Selenium image tag (4.51.0-...) matches selenium.version in pom.xml. Service containers can't read
+# workflow env vars, so it's written out in each job; update both together.
+
+jobs:
+  suite:
+    name: Suite (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, edge]
+    services:
+      # The browser runs in a Selenium container; the tests connect to it through SELENIUM_REMOTE_URL
+      selenium:
+        image: selenium/standalone-${{ matrix.browser }}:4.51.0-20261010
+        ports:
+          - 4444:4444
+        options: --shm-size=2g
+    env:
+      SELENIUM_REMOTE_URL: http://localhost:4444
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Wait for Selenium
+        run: .github/scripts/wait_for_selenium.sh
+
+      - name: Run tests
+        run: ./mvnw -B test -Dbrowser=${{ matrix.browser }}
+
+      - name: Summarize results
+        if: always()
+        run: python3 .github/scripts/test_summary.py "Suite on ${{ matrix.browser }}"
+
+      - name: Upload screenshots and reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: failure-evidence-${{ matrix.browser }}
+          path: |
+            target/screenshots/
+            target/surefire-reports/
+          if-no-files-found: ignore
+
+  known-defects:
+    name: Known defects (chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      selenium:
+        image: selenium/standalone-chrome:4.51.0-20261010
+        ports:
+          - 4444:4444
+        options: --shm-size=2g
+    env:
+      SELENIUM_REMOTE_URL: http://localhost:4444
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Wait for Selenium
+        run: .github/scripts/wait_for_selenium.sh
+
+      # These tests fail on purpose while the bugs exist, so their failures don't fail the job.
+      # The summary step warns if one starts passing, which means a bug was fixed.
+      - name: Run known-defect tests
+        run: ./mvnw -B test -Pknown-defects -Dbrowser=chrome -Dmaven.test.failure.ignore=true
+
+      - name: Summarize results
+        if: always()
+        run: python3 .github/scripts/test_summary.py "Known defects" --known-defects
+
+      - name: Upload defect screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: known-defect-evidence
+          path: |
+            target/screenshots/
+            target/surefire-reports/
+          if-no-files-found: ignore
