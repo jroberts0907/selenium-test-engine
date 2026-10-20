@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriverException;
 
 /**
  * Saves a screenshot to target/screenshots when a test fails.
@@ -32,6 +33,10 @@ public class ScreenshotOnFailure implements AfterTestExecutionCallback {
         String name = context.getRequiredTestClass().getSimpleName() + "_"
                 + context.getDisplayName().replaceAll("[^A-Za-z0-9._-]+", "_").replaceAll("^_|_$", "") + ".png";
         Files.createDirectories(DIR);
-        Files.write(DIR.resolve(name), camera.getScreenshotAs(OutputType.BYTES));
+        try {
+            Files.write(DIR.resolve(name), camera.getScreenshotAs(OutputType.BYTES));
+        } catch (WebDriverException e) {
+            // e.g. a JavaScript alert is open; skip the screenshot rather than hide the real failure
+        }
     }
 }

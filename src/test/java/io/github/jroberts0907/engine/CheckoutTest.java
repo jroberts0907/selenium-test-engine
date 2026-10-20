@@ -14,6 +14,7 @@ import io.github.jroberts0907.engine.pages.CheckoutInfoPage;
 import io.github.jroberts0907.engine.pages.CheckoutOverviewPage;
 import io.github.jroberts0907.engine.pages.LoginPage;
 import io.github.jroberts0907.engine.support.BaseTest;
+import io.github.jroberts0907.engine.support.Config;
 import io.github.jroberts0907.engine.support.TestUsers;
 
 class CheckoutTest extends BaseTest {
@@ -23,7 +24,7 @@ class CheckoutTest extends BaseTest {
     @BeforeEach
     void signInAndStartCheckout() {
         checkout = new LoginPage(driver).open()
-                .loginAs(TestUsers.STANDARD, TestUsers.PASSWORD)
+                .loginAs(Config.testUser(), TestUsers.PASSWORD)
                 .addToCart("Sauce Labs Backpack")
                 .addToCart("Sauce Labs Bike Light")
                 .openCart()

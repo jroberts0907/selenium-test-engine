@@ -14,6 +14,11 @@ public final class Config {
         return System.getProperty("baseUrl", "https://www.saucedemo.com");
     }
 
+    /** Account the suite signs in as. Pass -DtestUser=problem_user to run everything as a buggy account. */
+    public static String testUser() {
+        return System.getProperty("testUser", TestUsers.STANDARD);
+    }
+
     /** chrome, edge or firefox. */
     public static String browser() {
         return System.getProperty("browser", "chrome").toLowerCase();

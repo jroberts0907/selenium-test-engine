@@ -17,7 +17,22 @@
     <selenium.version>4.51.0</selenium.version>
     <junit.version>6.1.3</junit.version>
     <jackson.version>2.22.4</jackson.version>
+
+    <!-- Surefire reads these: tests tagged known-defect fail on purpose, so they're left out
+         unless the known-defects profile is on -->
+    <groups></groups>
+    <excludedGroups>known-defect</excludedGroups>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>known-defects</id>
+      <properties>
+        <groups>known-defect</groups>
+        <excludedGroups></excludedGroups>
+      </properties>
+    </profile>
+  </profiles>
 
   <dependencyManagement>
     <dependencies>

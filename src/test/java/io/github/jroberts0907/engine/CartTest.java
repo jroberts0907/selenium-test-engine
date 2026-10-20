@@ -12,6 +12,7 @@ import io.github.jroberts0907.engine.pages.CartPage;
 import io.github.jroberts0907.engine.pages.InventoryPage;
 import io.github.jroberts0907.engine.pages.LoginPage;
 import io.github.jroberts0907.engine.support.BaseTest;
+import io.github.jroberts0907.engine.support.Config;
 import io.github.jroberts0907.engine.support.TestUsers;
 
 class CartTest extends BaseTest {
@@ -24,7 +25,7 @@ class CartTest extends BaseTest {
     @BeforeEach
     void signInAndAddTwoItems() {
         inventory = new LoginPage(driver).open()
-                .loginAs(TestUsers.STANDARD, TestUsers.PASSWORD)
+                .loginAs(Config.testUser(), TestUsers.PASSWORD)
                 .addToCart(BACKPACK)
                 .addToCart(BIKE_LIGHT);
     }

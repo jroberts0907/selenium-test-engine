@@ -14,6 +14,7 @@ public class InventoryPage extends BasePage {
     private static final By PRODUCT_NAMES = By.cssSelector("[data-test='inventory-item-name']");
     private static final By PRODUCT_PRICES = By.cssSelector("[data-test='inventory-item-price']");
     private static final By CART_LINK = By.cssSelector("[data-test='shopping-cart-link']");
+    private static final By PRODUCT_IMAGES = By.cssSelector(".inventory_item_img img");
 
     public InventoryPage(WebDriver driver) {
         super(driver);
@@ -44,6 +45,12 @@ public class InventoryPage extends BasePage {
         return textsOf(PRODUCT_PRICES).stream()
                 .map(price -> Double.parseDouble(price.replace("$", "")))
                 .toList();
+    }
+
+    /** Image URL of each product, in the order they're shown. */
+    public List<String> productImageSources() {
+        visible(PRODUCT_IMAGES);
+        return driver.findElements(PRODUCT_IMAGES).stream().map(img -> img.getDomProperty("src")).toList();
     }
 
     /** Clicks a product's Add to cart button. */
