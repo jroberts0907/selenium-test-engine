@@ -36,6 +36,11 @@ public class CartPage extends BasePage {
         return this;
     }
 
+    public CheckoutInfoPage checkout() {
+        click(CHECKOUT_BUTTON);
+        return new CheckoutInfoPage(driver).waitUntilLoaded();
+    }
+
     public InventoryPage continueShopping() {
         click(CONTINUE_SHOPPING);
         return new InventoryPage(driver).waitUntilLoaded();
