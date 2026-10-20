@@ -1,6 +1,7 @@
 package io.github.jroberts0907.engine.pages;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -40,6 +41,12 @@ public abstract class BasePage {
 
     protected String textOf(By locator) {
         return visible(locator).getText();
+    }
+
+    /** Text of every match, waiting for at least one to appear. */
+    protected List<String> textsOf(By locator) {
+        visible(locator);
+        return driver.findElements(locator).stream().map(WebElement::getText).toList();
     }
 
     protected boolean isShown(By locator) {
