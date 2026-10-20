@@ -13,7 +13,7 @@ public class InventoryPage extends BasePage {
     private static final By SORT = By.cssSelector("[data-test='product-sort-container']");
     private static final By PRODUCT_NAMES = By.cssSelector("[data-test='inventory-item-name']");
     private static final By PRODUCT_PRICES = By.cssSelector("[data-test='inventory-item-price']");
-    private static final By CART_BADGE = By.cssSelector("[data-test='shopping-cart-badge']");
+    private static final By CART_LINK = By.cssSelector("[data-test='shopping-cart-link']");
 
     public InventoryPage(WebDriver driver) {
         super(driver);
@@ -52,13 +52,8 @@ public class InventoryPage extends BasePage {
         return this;
     }
 
-    /** Number on the cart badge, or 0 when the badge isn't shown. */
-    public int cartCount() {
-        return isShown(CART_BADGE) ? Integer.parseInt(textOf(CART_BADGE)) : 0;
-    }
-
-    /** The site builds button ids from product names: "Sauce Labs Backpack" -> sauce-labs-backpack. */
-    static String testIdSlug(String productName) {
-        return productName.replaceAll("\\s+", "-").toLowerCase();
+    public CartPage openCart() {
+        click(CART_LINK);
+        return new CartPage(driver).waitUntilLoaded();
     }
 }

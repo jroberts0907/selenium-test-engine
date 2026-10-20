@@ -17,6 +17,9 @@ public abstract class BasePage {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
 
+    // The header (and its cart badge) is on every page after login
+    private static final By CART_BADGE = By.cssSelector("[data-test='shopping-cart-badge']");
+
     protected final WebDriver driver;
     protected final WebDriverWait wait;
 
@@ -51,5 +54,15 @@ public abstract class BasePage {
 
     protected boolean isShown(By locator) {
         return !driver.findElements(locator).isEmpty() && driver.findElement(locator).isDisplayed();
+    }
+
+    /** Number on the header's cart badge, or 0 when the badge isn't shown. */
+    public int cartCount() {
+        return isShown(CART_BADGE) ? Integer.parseInt(textOf(CART_BADGE)) : 0;
+    }
+
+    /** The site builds button ids from product names: "Sauce Labs Backpack" -> sauce-labs-backpack. */
+    protected static String testIdSlug(String productName) {
+        return productName.replaceAll("\\s+", "-").toLowerCase();
     }
 }
