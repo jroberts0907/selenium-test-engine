@@ -68,6 +68,17 @@ class KnownDefectsTest {
         }
 
         @Test
+        @DisplayName("a product can be removed from the product list")
+        void productCanBeRemoved() {
+            // The backpack is one of the products problem_user *can* add, so only the remove is under test
+            InventoryPage inventory = signIn(this, TestUsers.PROBLEM)
+                    .addToCart("Sauce Labs Backpack")
+                    .removeFromCart("Sauce Labs Backpack");
+
+            assertEquals(0, inventory.cartCount());
+        }
+
+        @Test
         @DisplayName("each product shows its own image")
         void productImagesAreDistinct() {
             List<String> images = signIn(this, TestUsers.PROBLEM).productImageSources();

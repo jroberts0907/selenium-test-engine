@@ -59,6 +59,12 @@ public class InventoryPage extends BasePage {
         return this;
     }
 
+    /** Clicks a product's Remove button on the product list. */
+    public InventoryPage removeFromCart(String productName) {
+        click(By.cssSelector("[data-test='remove-" + testIdSlug(productName) + "']"));
+        return this;
+    }
+
     public CartPage openCart() {
         click(CART_LINK);
         return new CartPage(driver).waitUntilLoaded();

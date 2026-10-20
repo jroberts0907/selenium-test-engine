@@ -1,0 +1,12 @@
+{
+  "name": "Signing in shows the product list",
+  "steps": [
+    { "action": "open", "target": "/" },
+    { "action": "type", "target": "testid=username", "value": "${testUser}" },
+    { "action": "type", "target": "testid=password", "value": "${password}" },
+    { "action": "click", "target": "testid=login-button" },
+    { "action": "assertUrlContains", "value": "/inventory.html" },
+    { "action": "assertText", "target": "testid=title", "value": "Products" },
+    { "action": "assertCount", "target": "testid=inventory-item", "value": "6" }
+  ]
+}

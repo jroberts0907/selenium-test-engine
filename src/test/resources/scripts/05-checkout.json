@@ -1,0 +1,22 @@
+{
+  "name": "Checking out one product completes the order",
+  "description": "Backpack is $29.99; tax is 8% rounded to the cent, so the total is $32.39.",
+  "steps": [
+    { "action": "open", "target": "/" },
+    { "action": "type", "target": "testid=username", "value": "${testUser}" },
+    { "action": "type", "target": "testid=password", "value": "${password}" },
+    { "action": "click", "target": "testid=login-button" },
+    { "action": "click", "target": "testid=add-to-cart-sauce-labs-backpack" },
+    { "action": "click", "target": "testid=shopping-cart-link" },
+    { "action": "assertCount", "target": "testid=inventory-item", "value": "1" },
+    { "action": "click", "target": "testid=checkout" },
+    { "action": "type", "target": "testid=firstName", "value": "Test" },
+    { "action": "type", "target": "testid=lastName", "value": "User" },
+    { "action": "type", "target": "testid=postalCode", "value": "29501" },
+    { "action": "click", "target": "testid=continue" },
+    { "action": "assertText", "target": "testid=total-label", "value": "Total: $32.39" },
+    { "action": "click", "target": "testid=finish" },
+    { "action": "assertText", "target": "testid=complete-header", "value": "Thank you for your order!" },
+    { "action": "assertGone", "target": "testid=shopping-cart-badge" }
+  ]
+}

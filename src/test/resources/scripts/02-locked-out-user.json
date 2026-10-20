@@ -1,0 +1,11 @@
+{
+  "name": "A locked-out user sees an error and stays on the login page",
+  "steps": [
+    { "action": "open", "target": "/" },
+    { "action": "type", "target": "testid=username", "value": "locked_out_user" },
+    { "action": "type", "target": "testid=password", "value": "${password}" },
+    { "action": "click", "target": "testid=login-button" },
+    { "action": "assertText", "target": "testid=error", "value": "Epic sadface: Sorry, this user has been locked out." },
+    { "action": "assertVisible", "target": "testid=login-button" }
+  ]
+}
